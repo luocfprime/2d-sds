@@ -1,0 +1,10 @@
+name: pixels
+height: 512
+width: 512
+batch_size: 1
+rgb_as_latents: true
+optimizer:
+  name: Adam
+  opt_args:
+    betas: [0.9, 0.999]
+    lr: 0.01

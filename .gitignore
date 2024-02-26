@@ -1,0 +1,12 @@
+work_dir/
+.idea
+*.egg-info
+__pycache__
+.ipynb_checkpoints/
+src/
+.vscode/
+datasets
+scratch/
+slurm_log/
+diff_prior/
+sbatch_run.sh

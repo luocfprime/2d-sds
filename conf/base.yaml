@@ -1,0 +1,17 @@
+# common params
+seed: 0
+device: cuda
+
+name: ???
+group: ???
+note: ???
+
+uid: "${now:%H-%M-%S|%Y-%m-%d}|${note}"
+
+output_path: "./output/${name}/${uid}"
+
+log_interval: 50
+
+hydra:
+  run:
+    dir: ${output_path}

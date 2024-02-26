@@ -1,0 +1,22 @@
+name: sds
+group: ${name}
+note: "multistep-6, batch-13"
+
+defaults:
+  - base
+  - rasterizer: pixels
+  - w_schedule: w_1m_alphas_cumprod
+  - t_schedule: t_random
+  - algorithm: sds_algorithm
+  - _self_  # override the default values with the values below
+
+prompt: "a DSLR photo of a cat wearing armor."
+neg_prompt: ""
+
+iterations: 500
+
+algorithm:
+  multi_steps: 6
+
+rasterizer:
+  batch_size: 13

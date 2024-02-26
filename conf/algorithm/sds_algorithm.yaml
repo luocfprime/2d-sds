@@ -1,0 +1,11 @@
+name: sds
+device: ${device}
+half_inference: false
+model_path: "stabilityai/stable-diffusion-2-1-base"
+prompt: ${prompt}
+neg_prompt: ${neg_prompt}
+w_schedule_cfg: ${w_schedule}
+t_schedule_cfg: ${t_schedule}
+multi_steps: 1
+guidance_scale: 7.5
+log_interval: ${log_interval}
