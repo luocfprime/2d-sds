@@ -11,6 +11,7 @@ source venv/bin/activate
 # function load_env to export environment variables from function argument file
 function load_env() {
     if [ -f "$1" ]; then
+        # shellcheck disable=SC2046
         export $(cat $1 | xargs)
     fi
 }

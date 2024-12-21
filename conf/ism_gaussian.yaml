@@ -1,12 +1,12 @@
-name: sds
+name: ism
 group: ${name}
 note: ""
 
 defaults:
   - base
-  - rasterizer: pixels
+  - rasterizer: gaussian_2d
   - wt_schedule: dreamfusion
-  - algorithm: sds_algorithm
+  - algorithm: ism_algorithm
   - _self_  # override the default values with the values below
 
 prompt: "a photograph of an astronaut riding a horse."
@@ -14,9 +14,11 @@ neg_prompt: ""
 
 algorithm:
   guidance_scale: 7.5
+  max_inv_step: 5
+  delta_s: 100  # inversion interval
+  delta_t: 80  # score matching interval
 
 rasterizer:
-  batch_size: 4
-  optimizer:
-    opt_args:
-      lr: 0.05
+  batch_size: 2
+  num_points: 50000
+  

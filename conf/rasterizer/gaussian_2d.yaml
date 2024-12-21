@@ -1,0 +1,18 @@
+name: gaussian_2d
+height: 512
+width: 512
+batch_size: 1
+
+device: ${device}
+num_points: 50000
+
+init_opacity: 0.1
+
+log_interval: 100
+
+lr:
+  means: 0.005
+  scales: 0.003
+  quats: 0.01
+  rgbs: 0.05
+  opacities: 0.1

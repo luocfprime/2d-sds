@@ -4,7 +4,7 @@ note: ""
 
 defaults:
   - base
-  - rasterizer: pixels
+  - rasterizer: gaussian_2d
   - wt_schedule: dreamfusion
   - algorithm: sds_algorithm
   - _self_  # override the default values with the values below
@@ -16,7 +16,5 @@ algorithm:
   guidance_scale: 7.5
 
 rasterizer:
-  batch_size: 4
-  optimizer:
-    opt_args:
-      lr: 0.05
+  batch_size: 2
+  num_points: 50000

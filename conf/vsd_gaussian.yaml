@@ -1,22 +1,22 @@
-name: sds
+name: vsd
 group: ${name}
 note: ""
 
 defaults:
   - base
-  - rasterizer: pixels
+  - rasterizer: gaussian_2d
   - wt_schedule: dreamfusion
-  - algorithm: sds_algorithm
+  - algorithm: vsd_algorithm
   - _self_  # override the default values with the values below
 
 prompt: "a photograph of an astronaut riding a horse."
 neg_prompt: ""
 
 algorithm:
-  guidance_scale: 7.5
-
-rasterizer:
-  batch_size: 4
   optimizer:
     opt_args:
-      lr: 0.05
+      lr: 0.0001
+
+rasterizer:
+  batch_size: 2
+  num_points: 50000

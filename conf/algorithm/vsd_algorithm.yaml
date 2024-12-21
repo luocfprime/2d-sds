@@ -1,0 +1,21 @@
+name: vsd
+device: ${device}
+model_path: "stabilityai/stable-diffusion-2-1-base"
+
+prompt: ${prompt}
+neg_prompt: ${neg_prompt}
+
+wt_schedule_cfg: ${wt_schedule}
+
+guidance_scale: 7.5
+
+lora_scale: 1.0
+phi_update_step: 1
+phi_batch_size: ${rasterizer.batch_size}
+optimizer:
+  name: AdamW
+  opt_args:
+    lr: 0.0001
+
+log_interval: ${log_interval}
+log_sample_timesteps: [100, 500, 900]

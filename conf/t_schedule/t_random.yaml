@@ -1,6 +1,0 @@
-name: random
-num_train_timesteps: 1000 # TODO check
-num_steps: ${iterations}  # number of steps for random sampling (i.e. max diffusion steps)
-t_start: 20
-t_end: 980
-w_schedule_name: ${w_schedule.name}
