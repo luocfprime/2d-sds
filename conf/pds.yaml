@@ -1,0 +1,43 @@
+name: pds
+group: ${name}
+note: "${algorithm.source_prompts} -> ${algorithm.target_prompts}"
+
+defaults:
+  - base
+  - rasterizer: pixels
+  - algorithm: pds_algorithm
+  - _self_  # override the default values with the values below
+
+algorithm:
+  height: ${rasterizer.height}
+  width: ${rasterizer.width}
+
+  source_prompts: ["a man", "a man", "a man", "a white man", "a white man", "a man", "a man", "a man"]
+  target_prompts: ["a clown", "a golden statue", "a vampire", "an Asian man", "a black man", "Albert Einstein", "a Spiderman", "an Ironman"]
+  source_images_paths: ["imgs/face.png", "imgs/face.png", "imgs/face.png", "imgs/face.png", "imgs/face.png", "imgs/face.png", "imgs/face.png", "imgs/face.png"]
+  guidance_scale: 100
+
+rasterizer:
+  batch_size: 8
+  rgb_as_latents: true
+  init_strategy:
+    name: images
+    args:
+      image_paths: ${algorithm.source_images_paths}
+      vae_model_name_or_path: ${algorithm.model_path}
+  optimizer:
+    opt_args:
+      lr: 0.01
+
+wt_schedule:
+  name: independent
+  n_steps: ${iterations}
+  t_schedule_cfg:
+    name: uniform
+    args:
+      low: 0
+      high: 1000 # ddpm train steps
+  w_schedule_cfg:
+    name: constant
+    args:
+      value: 1.

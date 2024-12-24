@@ -47,6 +47,7 @@ If you are interested in developing new algorithms, refer to [DEVELOPMENT.md](./
 - Variational Score Distillation (VSD)
 - Interval Score Matching (ISM)
 - Delta Denoising Score (DDS)
+- Posterior Distillation Sampling (PDS)
 
 ### 2D representations:
 
@@ -65,5 +66,7 @@ If you are interested in developing new algorithms, refer to [DEVELOPMENT.md](./
 
 ## Acknowledgement
 
-Some code is referred from [Threestudio](https://github.com/threestudio-project/threestudio). Many thanks to their great
+Some code is referenced from [Threestudio](https://github.com/threestudio-project/threestudio). Many thanks to their great
 work!
+
+Also, some designs are inspired by [prolific_dreamer_2d](https://github.com/yuanzhi-zhu/prolific_dreamer2d), which also implemented some nice features.
