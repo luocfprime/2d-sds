@@ -27,9 +27,53 @@ It provides a **simpler, more flexible**, and **user-friendly** way to experimen
 
 ## Example
 
-Here is an example of testing the SDS algorithm with different guidance scales.
+This framework records and visualizes diverse intermediate results for your experiments.
 
-![sds_guidance_scale](assets/sds_guidance_scale.png)
+Here are some examples:
+
+### Example: experiment SDS algorithm with different guidance scales.
+
+<div style="text-align: center; margin: 20px 0;">
+    <img src="assets/sds_guidance_scale.png" alt="SDS Guidance Scale" style="max-width: 90%; height: auto;">
+    <div style="font-size: 0.9em; color: #555; margin-top: 10px;">Figure: SDS algorithm with different guidance scales.</div>
+</div>
+
+### Example: test different algorithms with different timestep strategies
+
+We implement numerous timestep strategies. The following is visualization of Dreamtime strategy:
+
+<div style="text-align: center; margin: 20px 0;">
+    <img src="assets/dreamtime.png" alt="Dreamtime Strategy" style="max-width: 90%; height: auto;">
+    <div style="font-size: 0.9em; color: #555; margin-top: 10px;">Figure: Visualization of Dreamtime strategy.</div>
+</div>
+
+With results on SDS and VSD:
+
+<div style="text-align: center; margin: 20px 0;">
+    <img src="assets/dreamtime_result.png" alt="Dreamtime Results" style="max-width: 90%; height: auto;">
+    <div style="font-size: 0.9em; color: #555; margin-top: 10px;">Figure: Results on SDS and VSD using Dreamtime strategy.</div>
+</div>
+
+### Example: test ISM with different hyperparameters
+
+<div style="text-align: center; margin: 20px 0;">
+    <img src="assets/ism_hyperparams.png" alt="ISM Hyperparameters" style="max-width: 90%; height: auto;">
+    <div style="font-size: 0.9em; color: #555; margin-top: 10px;">Figure: ISM tested with different hyperparameters.</div>
+</div>
+
+### Example: test DDS with different prompts
+
+<div style="text-align: center; margin: 20px 0;">
+    <img src="assets/dds_image.png" alt="DDS with Different Prompts" style="max-width: 90%; height: auto;">
+    <div style="font-size: 0.9em; color: #555; margin-top: 10px;">Figure: DDS tested with different prompts.</div>
+</div>
+
+### Example: visualization of the PDS gradient
+
+<div style="text-align: center; margin: 20px 0;">
+    <img src="assets/pds_gradient.png" alt="PDS Gradient" style="max-width: 90%; height: auto;">
+    <div style="font-size: 0.9em; color: #555; margin-top: 10px;">Figure: PDS gradient visualization.</div>
+</div>
 
 ## How to use it?
 
@@ -66,7 +110,6 @@ If you are interested in developing new algorithms, refer to [DEVELOPMENT.md](./
 
 ## Acknowledgement
 
-Some code is referenced from [Threestudio](https://github.com/threestudio-project/threestudio). Many thanks to their great
-work!
+Some code is referenced from [Threestudio](https://github.com/threestudio-project/threestudio). Many thanks to their great work!
 
 Also, some designs are inspired by [prolific_dreamer_2d](https://github.com/yuanzhi-zhu/prolific_dreamer2d), which also implemented some nice features.
