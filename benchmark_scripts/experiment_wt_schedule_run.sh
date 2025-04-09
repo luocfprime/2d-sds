@@ -3,8 +3,10 @@
 
 source <(envidia --cuda $1)
 
-labtasker loop --executable /bin/bash <<'LABTASKER_LOOP_EOF'
-algorithm='%(algorithm)'
-wt_schedule='%(wt_schedule)'
+LABTASKER_TASK_SCRIPT=$(mktemp)
+cat <<'LABTASKER_LOOP_EOF' > "$LABTASKER_TASK_SCRIPT"
+algorithm=%(algorithm)
+wt_schedule=%(wt_schedule)
     python main.py --config-path benchmark_conf --config-name "$algorithm" project=2d-sds-benchmark wt_schedule="$wt_schedule" note="exp_${algorithm}_${wt_schedule}"
 LABTASKER_LOOP_EOF
+labtasker loop --executable /bin/bash --script-path $LABTASKER_TASK_SCRIPT

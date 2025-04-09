@@ -3,9 +3,10 @@
 
 source <(envidia --cuda $1)
 
-labtasker loop --executable /bin/bash <<'LABTASKER_LOOP_EOF'
-algorithm='%(algorithm)'
-cfg='%(cfg)'
+LABTASKER_TASK_SCRIPT=$(mktemp)
+cat <<'LABTASKER_LOOP_EOF' > "$LABTASKER_TASK_SCRIPT"
+algorithm=%(algorithm)
+cfg=%(cfg)
     python main.py \
     --config-path benchmark_conf \
     --config-name "$algorithm" \
@@ -13,3 +14,4 @@ cfg='%(cfg)'
     note="exp_cfg_${algorithm}_${cfg}" \
     algorithm.guidance_scale="$cfg"
 LABTASKER_LOOP_EOF
+labtasker loop --executable /bin/bash --script-path $LABTASKER_TASK_SCRIPT

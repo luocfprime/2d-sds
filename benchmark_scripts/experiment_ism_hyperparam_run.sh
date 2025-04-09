@@ -3,9 +3,10 @@
 
 source <(envidia --cuda $1)
 
-labtasker loop --executable /bin/bash <<'LABTASKER_LOOP_EOF'
-delta_s='%(delta_s)'
-delta_t='%(delta_t)'
+LABTASKER_TASK_SCRIPT=$(mktemp)
+cat <<'LABTASKER_LOOP_EOF' > "$LABTASKER_TASK_SCRIPT"
+delta_s=%(delta_s)
+delta_t=%(delta_t)
     python main.py \
       --config-path benchmark_conf \
       --config-name ism \
@@ -17,3 +18,4 @@ delta_t='%(delta_t)'
       algorithm.delta_s="$delta_s" \
       algorithm.delta_t="$delta_t"
 LABTASKER_LOOP_EOF
+labtasker loop --executable /bin/bash --script-path $LABTASKER_TASK_SCRIPT
