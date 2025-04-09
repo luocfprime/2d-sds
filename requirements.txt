@@ -32,3 +32,4 @@ envidia
 black
 isort
 pre-commit
+conda-lock
