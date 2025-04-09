@@ -29,9 +29,7 @@ It provides a **simpler, more flexible**, and **user-friendly** way to experimen
 
 This framework records and visualizes diverse intermediate results for your experiments.
 
-Here is a example wandb report from one of the below experiments:
-
-<iframe src="https://wandb.ai/firefly-ustc/2d-sds-benchmark/reports/2D-SDS-Experiments--VmlldzoxMjIwNTAyMw?accessToken=lue4yzhmhs3lsp44t9ji1xrtrzmblt8op13gsy1axf3blayoicip4wxky5ihiopr" style="border:none;height:1024px;width:100%">
+**Here is a [example wandb report](https://wandb.ai/firefly-ustc/2d-sds-benchmark/reports/2D-SDS-Experiments--VmlldzoxMjIwNTAyMw?accessToken=lue4yzhmhs3lsp44t9ji1xrtrzmblt8op13gsy1axf3blayoicip4wxky5ihiopr) from one of the below experiments.**
 
 Here are some examples:
 
