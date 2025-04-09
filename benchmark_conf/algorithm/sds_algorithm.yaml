@@ -1,0 +1,12 @@
+name: sds
+device: ${device}
+model_path: "stabilityai/stable-diffusion-2-1-base"
+prompt: ${prompt}
+neg_prompt: ${neg_prompt}
+wt_schedule_cfg: ${wt_schedule}
+guidance_scale: 100
+
+update_steps_per_iter: 1  # optimize k steps for each iteration (i.e. each batch of noise update params for k times)
+
+log_interval: ${log_interval}
+log_sample_timesteps: [100, 500, 900]

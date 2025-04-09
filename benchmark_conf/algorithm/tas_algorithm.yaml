@@ -1,0 +1,20 @@
+name: tas
+mode: "single_pred"
+device: ${device}
+model_path: "stabilityai/stable-diffusion-2-1-base"
+prompt: ${prompt}
+neg_prompt: ${neg_prompt}
+guidance_scale: 7.5
+
+iterations: ${iterations}
+
+latent_mse_threshold: 0.00001  # break the loop if the mse is below this threshold
+update_steps_per_iter: 50  # optimize k steps for each iteration (i.e. each batch of noise update params for k times)
+
+loss:
+  latent_matching: ???
+  image_matching: ???
+
+error_compensation_cfg: ???
+
+log_interval: 5  # log every k steps

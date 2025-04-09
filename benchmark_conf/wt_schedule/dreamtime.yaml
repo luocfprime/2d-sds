@@ -1,0 +1,7 @@
+name: dreamtime
+iterations: ${iterations}
+model_path: ${algorithm.model_path}
+
+# hyperparameters, refer to https://arxiv.org/abs/2306.12422
+m: 800
+s: 300

@@ -1,0 +1,13 @@
+name: independent
+n_steps: ${iterations}
+
+w_schedule_cfg:
+  name: dreamfusion
+  args:
+    model_path: ${algorithm.model_path}
+
+t_schedule_cfg:
+  name: uniform
+  args:
+    low: 0
+    high: 1000 # ddpm train steps

@@ -1,0 +1,17 @@
+name: layered_simple  # only involves fg translation, rotation, and scaling
+height: 512
+width: 512
+batch_size: 1
+dtype: float32  # float16, float32, float64
+
+fg_image_paths: ["imgs/cat.png"]
+bg_image_paths: ["imgs/table.png"]
+
+translation_range: [-0.3, 0.3]  # unit: fraction of the image size
+rotation_range: [-60, 60]  # unit: degrees
+scale_range: [0.3, 0.7]
+
+optimizer:
+  name: Adam
+  opt_args:
+    lr: 0.01
