@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sds_2d"
-version = "0.0.0"
+version = "0.0.1"
 description = "A 2D SDS experimentation framework"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -15,19 +15,36 @@ classifiers = [
 
 dynamic = ["dependencies"]
 
+
+[tool.black]
+line-length = 88
+exclude = '''
+/(
+    \.git
+  | \.tox
+  | \.venv
+  | _build
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["sds_2d"]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+skip = [
+    ".git",
+    ".venv",
+    "_build",
+    "build",
+    "dist",
+]
+
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
 
-# extra dependencies
-[project.optional-dependencies]
-dev = [
-    "pytest~=7.4.3",
-    "pytest-cov~=4.1.0"
-]
-
 [tool.setuptools]
 packages = ["sds_2d"]
-
-## cli entrypoint
-#[project.scripts]
-#sds2d = "sds_2d.__main__:main"

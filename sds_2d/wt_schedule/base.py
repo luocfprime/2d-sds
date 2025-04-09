@@ -2,7 +2,6 @@ from matplotlib import pyplot as plt
 
 from ..utils.config import ValidateConfigMixin
 
-
 # class fn_getitem_to_call:  # noqa
 #     def __init__(self, fn):
 #         self.fn = fn

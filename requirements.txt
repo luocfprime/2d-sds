@@ -3,11 +3,11 @@ torchvision
 tqdm
 mediapipe
 Pillow
-diffusers
-transformers
+diffusers==0.25.0
+transformers==4.28.1
 hf_transfer
 fire
-huggingface_hub
+huggingface_hub==0.24.0
 imageio
 imageio-ffmpeg
 PyYAML
@@ -22,8 +22,13 @@ wandb
 jaxtyping
 einops
 omegaconf
-hydra-core
+hydra-core>=1.3
 kornia
 torchtyping
-gsplat @ git+https://github.com/nerfstudio-project/gsplat.git
+gsplat
 mpl_scatter_density
+labtasker[plugins]
+envidia
+black
+isort
+pre-commit

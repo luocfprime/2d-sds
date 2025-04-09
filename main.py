@@ -19,12 +19,13 @@ def main(cfg):
 
     if cfg.get("typecheck", False):
         from jaxtyping import install_import_hook
+
         install_import_hook("sds_2d", "typeguard.typechecked")
 
     import sds_2d  # noqa: F401
-    from sds_2d.utils.config import to_primitive
-    from sds_2d.utils.misc import seed_everything, save_code_snapshot
     from sds_2d import instantiate
+    from sds_2d.utils.config import to_primitive
+    from sds_2d.utils.misc import save_code_snapshot, seed_everything
 
     # Set seed
     seed_everything(cfg.get("seed", 42))
@@ -35,14 +36,13 @@ def main(cfg):
 
     wandb.tensorboard.patch(root_logdir=str(cfg.output_path))
 
-    wandb.init(
-        config=to_primitive(cfg),
-        **cfg.wandb
-    )
+    wandb.init(config=to_primitive(cfg), **cfg.wandb)
 
     writer = SummaryWriter(cfg.output_path)
 
-    os.symlink(wandb.run.dir, f"{cfg.output_path}/wandb_files", target_is_directory=True)
+    os.symlink(
+        wandb.run.dir, f"{cfg.output_path}/wandb_files", target_is_directory=True
+    )
 
     if cfg.get("save_code_snapshot", False):
         save_code_snapshot(f"{cfg.output_path}/code")
@@ -52,6 +52,7 @@ def main(cfg):
     rasterizer = instantiate(cfg.rasterizer).to(cfg.device)
     sampling_algorithm = instantiate(cfg.algorithm)
 
+    print(f"Starting optimization...")
     # optimization loop
     for step in tqdm(range(cfg.iterations), desc="Optimization Loop"):
         sampling_algorithm.step(step, rasterizer, writer)

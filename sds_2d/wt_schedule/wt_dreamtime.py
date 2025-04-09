@@ -5,9 +5,9 @@ import torch
 from diffusers import DDPMScheduler
 from matplotlib import pyplot as plt
 
-from .base import BaseWTSchedule
 from .. import register
 from ..utils.typings import DictConfig
+from .base import BaseWTSchedule
 
 
 @register("dreamtime")
@@ -27,17 +27,21 @@ class DreamtimeWTSchedule(BaseWTSchedule):
     def __init__(self, cfg: DictConfig):
         self.cfg = self.validate_config(cfg)
 
-        scheduler = DDPMScheduler.from_pretrained(self.cfg.model_path, subfolder="scheduler")
+        scheduler = DDPMScheduler.from_pretrained(
+            self.cfg.model_path, subfolder="scheduler"
+        )
 
         T = len(scheduler.betas)
         N = self.cfg.iterations
 
         t = torch.arange(0, T)
 
-        alphas_cumprod = torch.flip(scheduler.alphas_cumprod, dims=[0])  # from T -> 0 to 0 -> T
+        alphas_cumprod = torch.flip(
+            scheduler.alphas_cumprod, dims=[0]
+        )  # from T -> 0 to 0 -> T
 
         sig_scales = torch.sqrt(alphas_cumprod)  # ddpm scale of signal
-        sigmas = torch.sqrt(1. - alphas_cumprod)  # ddpm std of noise
+        sigmas = torch.sqrt(1.0 - alphas_cumprod)  # ddpm std of noise
 
         snrs = (sig_scales / sigmas) ** 2  # signal-to-noise ratio
 
@@ -46,7 +50,7 @@ class DreamtimeWTSchedule(BaseWTSchedule):
         s = self.cfg.s
 
         W_d = torch.sqrt((1 - alphas_cumprod) / alphas_cumprod)
-        W_p = torch.exp(-(t - m) ** 2 / (2 * s ** 2))
+        W_p = torch.exp(-((t - m) ** 2) / (2 * s**2))
         Z = torch.sum(W_d * W_p)
 
         W_t = W_d * W_p / Z
@@ -54,12 +58,12 @@ class DreamtimeWTSchedule(BaseWTSchedule):
         i = torch.arange(0, N)
         t_i = torch.argmin(
             torch.abs(
-                torch.flip(
-                    torch.cumsum(
-                        torch.flip(W_t, dims=[0]), 0
-                    ), dims=[0]
-                )[None, :] - i[:, None] / N
-            ), dim=1
+                torch.flip(torch.cumsum(torch.flip(W_t, dims=[0]), 0), dims=[0])[
+                    None, :
+                ]
+                - i[:, None] / N
+            ),
+            dim=1,
         )  # broadcast: [1, T] - [N, 1] -> [N, T] -> argmin dim=1 -> [N]
 
         self.W_d = W_d

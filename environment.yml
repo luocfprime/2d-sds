@@ -1,0 +1,14 @@
+name: sds2d
+channels:
+  - pytorch
+  - "nvidia/label/cuda-11.8.0"
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - cuda=11.8
+  - cuda-nvcc=11.8
+  - cudnn
+  - cudatoolkit
+  - cuda-libraries-dev=11.8
+  - ninja

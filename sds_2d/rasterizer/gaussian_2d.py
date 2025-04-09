@@ -1,19 +1,18 @@
+import math
 from dataclasses import dataclass
 
-import math
 import torch
 import torch.nn as nn
 from einops import rearrange
-from gsplat.project_gaussians import project_gaussians
-from gsplat.rasterize import rasterize_gaussians
+from gsplat import rasterization  # project_gaussians, rasterize_gaussians
 from torchvision.utils import make_grid
 
-from .base import BaseRasterizer
 from .. import register
-from ..utils.log import get_density_fig, fig_to_tensor
+from ..utils.log import fig_to_tensor, get_density_fig
 from ..utils.misc import step_check
 from ..utils.stable_diffusion import encode_images
 from ..utils.typings import DictConfig, Union
+from .base import BaseRasterizer
 
 
 def inverse_sigmoid(x):
@@ -74,7 +73,9 @@ class Gaussian2D(BaseRasterizer):
 
         bd = 2
 
-        self.means = bd * (torch.rand(bsz, self.num_points, 3, device=self.device) - 0.5)
+        self.means = bd * (
+            torch.rand(bsz, self.num_points, 3, device=self.device) - 0.5
+        )
         self.scales = torch.rand(bsz, self.num_points, 3, device=self.device)
         d = 3
         self.rgbs = torch.rand(bsz, self.num_points, d, device=self.device)
@@ -93,8 +94,9 @@ class Gaussian2D(BaseRasterizer):
             -1,
         ).repeat(bsz, 1, 1)
 
-        self.opacities = (torch.ones((bsz, self.num_points, 1), device=self.device) *
-                          inverse_sigmoid(self.cfg.init_opacity))
+        self.opacities = torch.ones(
+            (bsz, self.num_points, 1), device=self.device
+        ) * inverse_sigmoid(self.cfg.init_opacity)
 
         self.viewmat = torch.tensor(
             [
@@ -135,49 +137,72 @@ class Gaussian2D(BaseRasterizer):
             "xys": [],
         }
 
+        K = torch.tensor(
+            [[self.focal, 0, self.W / 2], [0, self.focal, self.H / 2], [0.0, 0.0, 1.0]],
+            device=self.means.device,
+        )
+
         for b in range(self.cfg.batch_size):
-            (
-                xys,
-                depths,
-                radii,
-                conics,
-                compensation,
-                num_tiles_hit,
-                cov3d,
-            ) = project_gaussians(
-                self.means[b],
-                self.scales[b],
-                1,
-                self.quats[b],
-                self.viewmat,
-                self.viewmat,
-                self.focal,
-                self.focal,
-                self.W / 2,
-                self.H / 2,
-                self.H,
-                self.W,
-                B_SIZE,
+            renders, alphas, meta = rasterization(
+                means=self.means[b],  # [N, 3]
+                quats=self.quats[b],  # [N, 4]
+                scales=self.scales[b],  # [N, 3]
+                opacities=self.opacities[b].squeeze(-1),  # [N]
+                colors=torch.sigmoid(self.rgbs[b]),  # [N, 3]
+                viewmats=self.viewmat[None, ...],  # [1, 4, 4]
+                Ks=K[None, ...],  # [1, 3, 3]
+                width=self.W,
+                height=self.H,
             )
-            torch.cuda.synchronize()
-            out_img = rasterize_gaussians(
-                xys,
-                depths,
-                radii,
-                conics,
-                num_tiles_hit,
-                torch.sigmoid(self.rgbs[b]),
-                torch.sigmoid(self.opacities[b]),
-                self.H,
-                self.W,
-                B_SIZE,
-                self.background,
-            )[..., :3]
-            torch.cuda.synchronize()
 
-            images.append(out_img)
+            torch.cuda.synchronize()
+            images.append(renders[0])  # [H, W, 3]
 
-            self.log_state_dict["xys"].append(xys)
+            self.log_state_dict["xys"].append(meta["means2d"][0])  # [N, 2]
+
+        # for b in range(self.cfg.batch_size):
+        #     (
+        #         xys,
+        #         depths,
+        #         radii,
+        #         conics,
+        #         compensation,
+        #         num_tiles_hit,
+        #         cov3d,
+        #     ) = project_gaussians(
+        #         self.means[b],
+        #         self.scales[b],
+        #         1,
+        #         self.quats[b],
+        #         self.viewmat,
+        #         self.viewmat,
+        #         self.focal,
+        #         self.focal,
+        #         self.W / 2,
+        #         self.H / 2,
+        #         self.H,
+        #         self.W,
+        #         B_SIZE,
+        #     )
+        #     torch.cuda.synchronize()
+        #     out_img = rasterize_gaussians(
+        #         xys,
+        #         depths,
+        #         radii,
+        #         conics,
+        #         num_tiles_hit,
+        #         torch.sigmoid(self.rgbs[b]),
+        #         torch.sigmoid(self.opacities[b]),
+        #         self.H,
+        #         self.W,
+        #         B_SIZE,
+        #         self.background,
+        #     )[..., :3]
+        #     torch.cuda.synchronize()
+        #
+        #     images.append(out_img)
+        #
+        #     self.log_state_dict["xys"].append(xys)
 
         return rearrange(torch.stack(images), "b h w c -> b c h w")
 
@@ -188,9 +213,12 @@ class Gaussian2D(BaseRasterizer):
         if step_check(step, self.cfg.log_interval, run_at_zero=True):
             self.get_images()  # run forward to get states
 
-            density_fig_tensor = torch.stack([
-                fig_to_tensor(get_density_fig(xy)) for xy in self.log_state_dict["xys"]
-            ])  # N, C, H, W
+            density_fig_tensor = torch.stack(
+                [
+                    fig_to_tensor(get_density_fig(xy))
+                    for xy in self.log_state_dict["xys"]
+                ]
+            )  # N, C, H, W
 
             writer.add_image(
                 "gaussians/density",
@@ -198,9 +226,15 @@ class Gaussian2D(BaseRasterizer):
                 step,
             )
 
-            writer.add_scalar("gaussians/opacity_max", torch.sigmoid(self.opacities).max(), step)
-            writer.add_scalar("gaussians/opacity_min", torch.sigmoid(self.opacities).min(), step)
-            writer.add_scalar("gaussians/opacity_mean", torch.sigmoid(self.opacities).mean(), step)
+            writer.add_scalar(
+                "gaussians/opacity_max", torch.sigmoid(self.opacities).max(), step
+            )
+            writer.add_scalar(
+                "gaussians/opacity_min", torch.sigmoid(self.opacities).min(), step
+            )
+            writer.add_scalar(
+                "gaussians/opacity_mean", torch.sigmoid(self.opacities).mean(), step
+            )
 
             writer.add_scalar("gaussians/scale_max", self.scales.max(), step)
             writer.add_scalar("gaussians/scale_min", self.scales.min(), step)

@@ -1,6 +1,7 @@
 """
 Credits to threestudio
 """
+
 from dataclasses import dataclass
 
 from omegaconf import OmegaConf
@@ -11,11 +12,11 @@ from .typings import Any, DictConfig, Optional, Union
 def to_primitive(cfg, resolve=True):
     # convert omegaconf to primitive types, avoid errors in calls of type(cfg) and isinstance(cfg, ...)
     if (
-            isinstance(cfg, float)
-            or isinstance(cfg, int)
-            or isinstance(cfg, str)
-            or isinstance(cfg, list)
-            or isinstance(cfg, dict)
+        isinstance(cfg, float)
+        or isinstance(cfg, int)
+        or isinstance(cfg, str)
+        or isinstance(cfg, list)
+        or isinstance(cfg, dict)
     ):
         return cfg
     return OmegaConf.to_container(cfg, resolve=resolve)

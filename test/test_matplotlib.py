@@ -1,8 +1,10 @@
-from sds_2d.utils.log import show_image, add_text_label, get_heatmap
-from torchvision.utils import make_grid
-import torch
-import numpy as np
 import time
+
+import numpy as np
+import torch
+from torchvision.utils import make_grid
+
+from sds_2d.utils.log import add_text_label, get_heatmap, show_image
 
 if __name__ == "__main__":
     # x = torch.FloatTensor(3, 256, 256).uniform_(0, 1)  # 1. test with torch.Tensor, CHW

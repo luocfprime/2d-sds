@@ -6,7 +6,5 @@ from kornia.geometry.conversions import (
 from .typings import TensorType
 
 
-def quats2rotmat_batched(
-        quats: TensorType["N", 4]
-) -> TensorType["N", 3, 3]:
+def quats2rotmat_batched(quats: TensorType["N", 4]) -> TensorType["N", 3, 3]:
     return quaternion_to_rotation_matrix(quats, QuaternionCoeffOrder.WXYZ)  # noqa

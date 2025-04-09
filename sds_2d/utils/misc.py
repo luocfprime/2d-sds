@@ -34,7 +34,7 @@ def get_file_list():
                 'git ls-files -- ":!:load/*"', shell=True
             ).splitlines()
         )
-                 | set(  # hard code, TODO: use config to exclude folders or files
+        | set(  # hard code, TODO: use config to exclude folders or files
             subprocess.check_output(
                 "git ls-files --others --exclude-standard", shell=True
             ).splitlines()

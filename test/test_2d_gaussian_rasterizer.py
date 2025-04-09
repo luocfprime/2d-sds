@@ -3,17 +3,18 @@ from pathlib import Path
 import torch
 from diffusers.utils import load_image
 from omegaconf import OmegaConf
-from torchvision.transforms import ToTensor, ToPILImage
+from torchvision.transforms import ToPILImage, ToTensor
 from torchvision.utils import make_grid
 
 from sds_2d.rasterizer import get_rasterizer
-from sds_2d.utils.log import get_density_fig, fig_to_tensor, show_image
-
+from sds_2d.utils.log import fig_to_tensor, get_density_fig, show_image
 
 if __name__ == "__main__":
     device = "cuda:0"
 
-    gt_images_paths = list(Path("../imgs/").glob("*.jpg")) + list(Path("../imgs/").glob("*.png"))
+    gt_images_paths = list(Path("../imgs/").glob("*.jpg")) + list(
+        Path("../imgs/").glob("*.png")
+    )
     gt_images = [ToTensor()(load_image(str(p))) for p in gt_images_paths]
     gt_images = torch.stack(gt_images).to(device)
 
@@ -38,7 +39,7 @@ if __name__ == "__main__":
                 "quats": 0.01,
                 "rgbs": 0.1,
                 "opacities": 0.1,
-            }
+            },
         }
     )
 
@@ -53,9 +54,12 @@ if __name__ == "__main__":
         print(f"Step {i}: Loss {loss.item()}")
 
         # log densities
-        density_fig_tensor = torch.stack([
-            fig_to_tensor(get_density_fig(xy)) for xy in rasterizer.log_state_dict["xys"]
-        ])  # N, C, H, W
+        density_fig_tensor = torch.stack(
+            [
+                fig_to_tensor(get_density_fig(xy))
+                for xy in rasterizer.log_state_dict["xys"]
+            ]
+        )  # N, C, H, W
         densities.append(make_grid(density_fig_tensor, nrow=rasterizer.cfg.batch_size))
 
     # save the final images
@@ -69,6 +73,8 @@ if __name__ == "__main__":
         img = ToPILImage()(img)
         img.save(f"./renders/density_{i}.png")
 
-    show_image(make_grid(torch.cat([gt_images, rendered_images], dim=0), nrow=cfg.batch_size))
+    show_image(
+        make_grid(torch.cat([gt_images, rendered_images], dim=0), nrow=cfg.batch_size)
+    )
 
     print("Done.")

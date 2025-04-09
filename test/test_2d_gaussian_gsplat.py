@@ -1,14 +1,13 @@
+import math
 import os
 import time
 from pathlib import Path
 from typing import Optional
 
-import math
 import numpy as np
 import torch
+from gsplat import project_gaussians, rasterize_gaussians
 from PIL import Image
-from gsplat.project_gaussians import project_gaussians
-from gsplat.rasterize import rasterize_gaussians
 from torch import Tensor, optim
 
 
@@ -16,9 +15,9 @@ class SimpleTrainer:
     """Trains random gaussians to fit an image."""
 
     def __init__(
-            self,
-            gt_image: Tensor,
-            num_points: int = 2000,
+        self,
+        gt_image: Tensor,
+        num_points: int = 2000,
     ):
         self.device = torch.device("cuda:0")
         self.gt_image = gt_image.to(device=self.device)
@@ -74,11 +73,11 @@ class SimpleTrainer:
         self.viewmat.requires_grad = False
 
     def train(
-            self,
-            iterations: int = 1000,
-            lr: float = 0.01,
-            save_imgs: bool = False,
-            B_SIZE: int = 14,
+        self,
+        iterations: int = 1000,
+        lr: float = 0.01,
+        save_imgs: bool = False,
+        B_SIZE: int = 14,
     ):
         optimizer = optim.Adam(
             [self.rgbs, self.means, self.scales, self.opacities, self.quats], lr
@@ -172,13 +171,13 @@ def image_path_to_tensor(image_path: Path):
 
 
 def main(
-        height: int = 256,
-        width: int = 256,
-        num_points: int = 100000,
-        save_imgs: bool = True,
-        img_path: Optional[Path] = None,
-        iterations: int = 1000,
-        lr: float = 0.01,
+    height: int = 256,
+    width: int = 256,
+    num_points: int = 100000,
+    save_imgs: bool = True,
+    img_path: Optional[Path] = None,
+    iterations: int = 1000,
+    lr: float = 0.01,
 ) -> None:
     if img_path:
         gt_image = image_path_to_tensor(img_path)
@@ -186,7 +185,7 @@ def main(
         gt_image = torch.ones((height, width, 3)) * 1.0
         # make top left and bottom right red, blue
         gt_image[: height // 2, : width // 2, :] = torch.tensor([1.0, 0.0, 0.0])
-        gt_image[height // 2:, width // 2:, :] = torch.tensor([0.0, 0.0, 1.0])
+        gt_image[height // 2 :, width // 2 :, :] = torch.tensor([0.0, 0.0, 1.0])
 
     trainer = SimpleTrainer(gt_image=gt_image, num_points=num_points)
     trainer.train(

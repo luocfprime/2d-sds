@@ -2,7 +2,17 @@
 
 The project is packed as a python package.
 
-Use the following command to install it.
+```bash
+conda env create -f environment.yml
+```
+
+Install PyTorch:
+
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+```
+
+Install other dependencies:
 
 ```bash
 pip install -e .

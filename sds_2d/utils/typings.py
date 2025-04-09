@@ -22,9 +22,9 @@ from typing import (
     Sized,
     Tuple,
     Type,
+    TypedDict,
     TypeVar,
     Union,
-    TypedDict
 )
 
 # Tensor dtype
@@ -32,13 +32,11 @@ from typing import (
 from jaxtyping import Bool, Complex, Float, Inexact, Int, Integer, Num, Shaped, UInt
 
 # Config type
-from omegaconf import DictConfig
-from omegaconf import ListConfig
-
-from torchtyping import TensorType
+from omegaconf import DictConfig, ListConfig
 
 # PyTorch Tensor type
 from torch import Tensor
+from torchtyping import TensorType
 
 # Runtime type checking decorator
 from typeguard import typechecked as typechecker

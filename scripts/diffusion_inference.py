@@ -9,8 +9,10 @@ samples_per_prompt = 4
 
 guidance = 7.5
 
-prompts = ["a photograph of an astronaut riding a horse.",
-           "a cat on a wooden table.",]
+prompts = [
+    "a photograph of an astronaut riding a horse.",
+    "a cat on a wooden table.",
+]
 ##################################################
 
 pipe = StableDiffusionPipeline.from_pretrained(
@@ -25,9 +27,10 @@ for i, prompt in tqdm(enumerate(prompts), desc="prompts"):
     prompt_stripped = prompt.strip()
     print(f"prompt: {prompt}")
     for j in tqdm(range(samples_per_prompt), desc="samples"):
-        image = pipe(prompt,
-                     guidance_scale=guidance,
-                     ).images[0]
+        image = pipe(
+            prompt,
+            guidance_scale=guidance,
+        ).images[0]
         axes[i, j].imshow(image)
 
 plt.show()

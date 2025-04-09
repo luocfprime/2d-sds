@@ -38,15 +38,9 @@ if __name__ == "__main__":
                 "name": "dreamfusion",
                 "args": {
                     "model_path": "stabilityai/stable-diffusion-2-1-base",
-                }
+                },
             },
-            "t_schedule_cfg": {
-                "name": "uniform",
-                "args": {
-                    "low": 0,
-                    "high": 1000
-                }
-            }
+            "t_schedule_cfg": {"name": "uniform", "args": {"low": 0, "high": 1000}},
         }
     )
 

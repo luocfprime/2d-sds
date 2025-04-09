@@ -1,6 +1,7 @@
 """
 Registry implementation borrowed from https://github.com/threestudio-project/threestudio
 """
+
 __modules__ = {}
 
 

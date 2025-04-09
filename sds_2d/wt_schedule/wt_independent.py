@@ -6,9 +6,9 @@ import numpy as np
 import torch
 from diffusers import DDPMScheduler
 
-from .base import BaseWTSchedule
 from .. import register
 from ..utils.typings import DictConfig
+from .base import BaseWTSchedule
 
 
 # Some simple implementations of weight and timestep schedules
@@ -28,17 +28,26 @@ def discrete_uniform_schedule(low, high):
     return lambda x: np.random.randint(low, high)
 
 
-def random_decay_schedule(low_start, high_start, low_end, high_end, n_steps, decay_func: str = "linear"):
+def random_decay_schedule(
+    low_start, high_start, low_end, high_end, n_steps, decay_func: str = "linear"
+):
     """
     lower bounds (low_*) are inclusive, upper bounds are exclusive
     """
-    assert decay_func in ["linear", "exp"], f"decay_func currently not supported: {decay_func}"
+    assert decay_func in [
+        "linear",
+        "exp",
+    ], f"decay_func currently not supported: {decay_func}"
     if decay_func == "linear":
         lower_bound = np.linspace(low_start, low_end, n_steps, dtype=int)
         upper_bound = np.linspace(high_start, high_end, n_steps, dtype=int)
     else:
-        lower_bound = np.floor(np.exp(np.linspace(np.log(low_start), np.log(low_end), n_steps)))
-        upper_bound = np.ceil(np.exp(np.linspace(np.log(high_start), np.log(high_end), n_steps)))
+        lower_bound = np.floor(
+            np.exp(np.linspace(np.log(low_start), np.log(low_end), n_steps))
+        )
+        upper_bound = np.ceil(
+            np.exp(np.linspace(np.log(high_start), np.log(high_end), n_steps))
+        )
 
     return lambda x: np.random.randint(lower_bound[x], upper_bound[x])
 
@@ -60,7 +69,9 @@ def piecewise_linear_schedule(pts, dtype=int):
     pts: list of tuples [(x1, y1), (x2, y2), ...]
     """
     x, y = zip(*pts)
-    if not all(x[i] <= x[i + 1] for i in range(len(x) - 1)):  # if x not in ascending order, warn it
+    if not all(
+        x[i] <= x[i + 1] for i in range(len(x) - 1)
+    ):  # if x not in ascending order, warn it
         warn("x values are not in ascending order")
     x = np.array(x)
     y = np.array(y)
@@ -73,7 +84,9 @@ def stepping_schedule(pts):
     pts: list of tuples [(x1, y1), (x2, y2), ...]
     """
     x, y = zip(*pts)
-    if not all(x[i] <= x[i + 1] for i in range(len(x) - 1)):  # if x not in ascending order, warn it
+    if not all(
+        x[i] <= x[i + 1] for i in range(len(x) - 1)
+    ):  # if x not in ascending order, warn it
         warn("x values are not in ascending order")
     x = np.array(x)
     y = np.array(y)
@@ -90,21 +103,26 @@ class diffusion_based_w_schedule:  # noqa
 
         self.betas = scheduler.betas
         self.alphas = scheduler.alphas
-        self.alphas_cumprod = scheduler.alphas_cumprod  # alphas_cumprod is 'alphas' in threestudio
+        self.alphas_cumprod = (
+            scheduler.alphas_cumprod
+        )  # alphas_cumprod is 'alphas' in threestudio
 
         self.sig_scales = torch.sqrt(self.alphas_cumprod)  # ddpm scale of signal
-        self.sigmas = torch.sqrt(1. - self.alphas_cumprod)  # ddpm std of noise
+        self.sigmas = torch.sqrt(1.0 - self.alphas_cumprod)  # ddpm std of noise
 
     def __call__(self, x):
         if self.method_name == "dreamfusion":
             return 1.0 - self.alphas_cumprod[x]  # \sigma_t^2
         elif self.method_name == "fantasia3d":
-            return self.alphas_cumprod[x] ** 0.5 * (1 - self.alphas_cumprod[x])  # \sigma_t^2 * \sqrt(1 - \sigma_t^2)
+            return self.alphas_cumprod[x] ** 0.5 * (
+                1 - self.alphas_cumprod[x]
+            )  # \sigma_t^2 * \sqrt(1 - \sigma_t^2)
         else:
             raise NotImplementedError(f"method_name {self.method_name} not implemented")
 
 
 # implementation ends here ------------------------------------------------
+
 
 @register("independent")
 class IndependentWTSchedule(BaseWTSchedule):
@@ -152,10 +170,14 @@ class IndependentWTSchedule(BaseWTSchedule):
         self.cfg = self.validate_config(cfg)
 
         w_schedule_args = self.cfg.w_schedule_cfg.get("args", {})
-        w_schedule_fn = self.independent_w_schedule_registry[self.cfg.w_schedule_cfg.name](**w_schedule_args)
+        w_schedule_fn = self.independent_w_schedule_registry[
+            self.cfg.w_schedule_cfg.name
+        ](**w_schedule_args)
 
         t_schedule_args = self.cfg.t_schedule_cfg.get("args", {})
-        t_schedule_fn = self.independent_t_schedule_registry[self.cfg.t_schedule_cfg.name](**t_schedule_args)
+        t_schedule_fn = self.independent_t_schedule_registry[
+            self.cfg.t_schedule_cfg.name
+        ](**t_schedule_args)
 
         optimization_steps = list(range(self.cfg.n_steps))
 

@@ -3,20 +3,23 @@ from dataclasses import dataclass, field
 
 import torch
 import torch.nn.functional as F  # noqa
-from diffusers import AutoencoderKL, UNet2DConditionModel
-from diffusers import DDPMScheduler
+from diffusers import AutoencoderKL, DDPMScheduler, UNet2DConditionModel
 from torchvision.transforms import ToPILImage
 from torchvision.utils import make_grid
 from transformers import CLIPTextModel, CLIPTokenizer
 
-from .base import BaseAlgorithm
-from .. import register, instantiate
+from .. import instantiate, register
 from ..utils.eval import get_clip_similarity
-from ..utils.log import get_heatmap, add_text_label
+from ..utils.log import add_text_label, get_heatmap
 from ..utils.misc import step_check
-from ..utils.stable_diffusion import ddim_inverse_step
-from ..utils.stable_diffusion import predict_noise, predict_noise_no_cfg, decode_latents
+from ..utils.stable_diffusion import (
+    ddim_inverse_step,
+    decode_latents,
+    predict_noise,
+    predict_noise_no_cfg,
+)
 from ..utils.typings import DictConfig, List
+from .base import BaseAlgorithm
 
 logger = logging.getLogger(__name__)
 
@@ -47,12 +50,14 @@ class ISM(BaseAlgorithm):
         delta_s: int = 100  # inversion interval
         delta_t: int = 80  # score matching interval
 
-        eval_clip_backbones: List[str] = field(default_factory=lambda: [
-            "openai/clip-vit-base-patch16",
-            "openai/clip-vit-base-patch32",
-            "openai/clip-vit-large-patch14-336",
-            "openai/clip-vit-large-patch14"
-        ])
+        eval_clip_backbones: List[str] = field(
+            default_factory=lambda: [
+                "openai/clip-vit-base-patch16",
+                "openai/clip-vit-base-patch32",
+                "openai/clip-vit-large-patch14-336",
+                "openai/clip-vit-large-patch14",
+            ]
+        )
 
     cfg: Config
 
@@ -62,15 +67,25 @@ class ISM(BaseAlgorithm):
         dtype = torch.float32  # torch.float32 by default
         device = torch.device(cfg.device)
 
-        # 1. Load the autoencoder model which will be used to decode the latents into image space. 
-        vae = AutoencoderKL.from_pretrained(cfg.model_path, subfolder="vae", torch_dtype=dtype)
-        # 2. Load the tokenizer and text encoder to tokenize and encode the text. 
-        tokenizer = CLIPTokenizer.from_pretrained(cfg.model_path, subfolder="tokenizer", torch_dtype=dtype)
-        text_encoder = CLIPTextModel.from_pretrained(cfg.model_path, subfolder="text_encoder", torch_dtype=dtype)
+        # 1. Load the autoencoder model which will be used to decode the latents into image space.
+        vae = AutoencoderKL.from_pretrained(
+            cfg.model_path, subfolder="vae", torch_dtype=dtype
+        )
+        # 2. Load the tokenizer and text encoder to tokenize and encode the text.
+        tokenizer = CLIPTokenizer.from_pretrained(
+            cfg.model_path, subfolder="tokenizer", torch_dtype=dtype
+        )
+        text_encoder = CLIPTextModel.from_pretrained(
+            cfg.model_path, subfolder="text_encoder", torch_dtype=dtype
+        )
         # 3. The UNet model for generating the latents.
-        unet = UNet2DConditionModel.from_pretrained(cfg.model_path, subfolder="unet", torch_dtype=dtype)
+        unet = UNet2DConditionModel.from_pretrained(
+            cfg.model_path, subfolder="unet", torch_dtype=dtype
+        )
         # 4. Scheduler
-        scheduler = DDPMScheduler.from_pretrained(cfg.model_path, subfolder="scheduler", torch_dtype=dtype)
+        scheduler = DDPMScheduler.from_pretrained(
+            cfg.model_path, subfolder="scheduler", torch_dtype=dtype
+        )
         scheduler.set_timesteps(len(scheduler.betas))
 
         unet = unet.to(device)
@@ -91,17 +106,25 @@ class ISM(BaseAlgorithm):
         self.device = device
 
         # encode prompt
-        text_input = tokenizer([cfg.prompt],
-                               return_tensors="pt", padding="max_length", truncation=True,
-                               max_length=tokenizer.model_max_length)
+        text_input = tokenizer(
+            [cfg.prompt],
+            return_tensors="pt",
+            padding="max_length",
+            truncation=True,
+            max_length=tokenizer.model_max_length,
+        )
 
         with torch.no_grad():
             self.text_embed = text_encoder(text_input.input_ids.to(device))[0]
 
         max_length = text_input.input_ids.shape[-1]
-        uncond_input = tokenizer([cfg.neg_prompt],
-                                 return_tensors="pt", padding="max_length", truncation=True,
-                                 max_length=max_length)
+        uncond_input = tokenizer(
+            [cfg.neg_prompt],
+            return_tensors="pt",
+            padding="max_length",
+            truncation=True,
+            max_length=max_length,
+        )
 
         with torch.no_grad():
             self.uncond_text_embed = text_encoder(uncond_input.input_ids.to(device))[0]
@@ -113,7 +136,7 @@ class ISM(BaseAlgorithm):
                     return_tensors="pt",
                     padding="max_length",
                     truncation=True,
-                    max_length=max_length
+                    max_length=max_length,
                 ).input_ids.to(device)
             )[0]
 
@@ -127,10 +150,7 @@ class ISM(BaseAlgorithm):
         bsz = latents.shape[0]
 
         # 1. DDIM inversion from x_0 to x_s
-        n = min(
-            (t - self.cfg.delta_t) // self.cfg.delta_s,
-            self.cfg.max_inv_step
-        )
+        n = min((t - self.cfg.delta_t) // self.cfg.delta_s, self.cfg.max_inv_step)
         t_s = t - self.cfg.delta_t
         # satisfies: t_s = t_init + n * delta_s
         t_init = t_s - n * self.cfg.delta_s
@@ -140,7 +160,7 @@ class ISM(BaseAlgorithm):
                 unet=self.unet,
                 noisy_latents=x_s,
                 text_embeddings=self.null_embed.expand(bsz, -1, -1),
-                t=t_init + i * self.cfg.delta_s
+                t=t_init + i * self.cfg.delta_s,
             )
             x_s, x_s_0 = ddim_inverse_step(
                 scheduler=self.scheduler,
@@ -155,7 +175,7 @@ class ISM(BaseAlgorithm):
             unet=self.unet,
             noisy_latents=x_s,
             text_embeddings=self.null_embed.expand(bsz, -1, -1),
-            t=t_s
+            t=t_s,
         )
 
         x_t, _ = ddim_inverse_step(
@@ -174,7 +194,7 @@ class ISM(BaseAlgorithm):
             uncond_text_embeddings=self.uncond_text_embed.expand(bsz, -1, -1),
             t=t.repeat(bsz),
             scheduler=self.scheduler,
-            guidance_scale=self.cfg.guidance_scale
+            guidance_scale=self.cfg.guidance_scale,
         )
 
         grad_raw = torch.nan_to_num(e_t - e_s)
@@ -198,10 +218,7 @@ class ISM(BaseAlgorithm):
         loss_start, loss_end = None, None  # loss value of start and end of update
         for _ in range(self.cfg.update_steps_per_iter):
             # use same noise and update params multiple times
-            (
-                grad_raw,
-                *_
-            ) = self.compute_ism(latents, noise, t).values()
+            (grad_raw, *_) = self.compute_ism(latents, noise, t).values()
 
             grad = torch.nan_to_num(  # noqa
                 grad_raw * self.w_schedule(step)  # apply weight schedule
@@ -248,19 +265,21 @@ class ISM(BaseAlgorithm):
         latents = rasterizer.get_latents(self.vae)
         bsz = latents.shape[0]
 
-        rendered_images = decode_latents(latents, self.vae)  # 1. original rendered images
-        writer.add_image(f"visualization/rendered", make_grid(rendered_images, nrow=bsz), step)
+        rendered_images = decode_latents(
+            latents, self.vae
+        )  # 1. original rendered images
+        writer.add_image(
+            f"visualization/rendered", make_grid(rendered_images, nrow=bsz), step
+        )
 
         # images_x0s = []  # x0 at different sample timesteps
         heatmaps = []
         for t in self.cfg.log_sample_timesteps:  # sample with to different timesteps
             noise = torch.randn_like(latents)
 
-            (
-                grad_raw,
-                e_s,
-                e_t
-            ) = self.compute_ism(latents, noise, torch.tensor([t]).to(self.device)).values()
+            (grad_raw, e_s, e_t) = self.compute_ism(
+                latents, noise, torch.tensor([t]).to(self.device)
+            ).values()
 
             # pred_latents_x0_pseudo_gt = self.scheduler.step(e_t - e_s + noise,
             #                                                 t,
@@ -270,7 +289,9 @@ class ISM(BaseAlgorithm):
             grad = torch.nan_to_num(
                 grad_raw * self.w_schedule(step)  # apply weight schedule
             )
-            grad_abs = F.interpolate(grad.abs().mean(1, keepdim=True), size=rendered_images.shape[-2:]).cpu()
+            grad_abs = F.interpolate(
+                grad.abs().mean(1, keepdim=True), size=rendered_images.shape[-2:]
+            ).cpu()
             heatmap = get_heatmap(grad_abs, size=rendered_images.shape[-2:])
 
             # images_x0s.append(images_x0)
@@ -282,8 +303,13 @@ class ISM(BaseAlgorithm):
 
         # writer.add_image(f"visualization/predict_x0_pseudo_gt",
         #                  make_labeled_grid(images_x0s, [f"t={t}" for t in self.cfg.log_sample_timesteps]), step)
-        writer.add_image(f"visualization/grad",
-                         make_labeled_grid(heatmaps, [f"t={t}" for t in self.cfg.log_sample_timesteps]), step)
+        writer.add_image(
+            f"visualization/grad",
+            make_labeled_grid(
+                heatmaps, [f"t={t}" for t in self.cfg.log_sample_timesteps]
+            ),
+            step,
+        )
 
         # eval clip score
         for clip_name in self.cfg.eval_clip_backbones:
@@ -291,6 +317,8 @@ class ISM(BaseAlgorithm):
             clip_score = 0
             for img in rendered_images:
                 rgb_pil = ToPILImage()(img)
-                clip_score += clip_similarity.compute_text_img_similarity(rgb_pil, self.cfg.prompt)
+                clip_score += clip_similarity.compute_text_img_similarity(
+                    rgb_pil, self.cfg.prompt
+                )
             clip_score /= len(rendered_images)
             writer.add_scalar(f"clip_score/{clip_name}", clip_score, step)

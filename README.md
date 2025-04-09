@@ -108,6 +108,10 @@ If you are interested in developing new algorithms, refer to [DEVELOPMENT.md](./
 - random decay
 - etc.
 
+## Development Guide
+
+For more information, please refer to [docs](docs).
+
 ## Acknowledgement
 
 Some code is referenced from [Threestudio](https://github.com/threestudio-project/threestudio). Many thanks to their great work!

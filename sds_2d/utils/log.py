@@ -3,15 +3,15 @@ import mpl_scatter_density  # noqa
 import numpy as np
 import torch
 import torch.nn.functional as F
-from PIL import Image, ImageDraw
 from einops import rearrange
 from matplotlib.colors import LinearSegmentedColormap
-from torchvision.transforms import ToPILImage, PILToTensor
+from PIL import Image, ImageDraw
+from torchvision.transforms import PILToTensor, ToPILImage
 
-from .typings import Union, List
+from .typings import List, Union
 
 
-def get_heatmap(tensor, size=None, cmap='viridis'):
+def get_heatmap(tensor, size=None, cmap="viridis"):
     """
     Given a batch of tensor, colorize it with a palette and return a grid of heatmaps
     Args:
@@ -22,7 +22,10 @@ def get_heatmap(tensor, size=None, cmap='viridis'):
     Returns:
         A batched tensor heatmap of the tensor of shape "B 3 H W", range [0, 1]
     """
-    assert tensor.dim() in [3, 4], f"Expected 3D or 4D tensor, got {tensor.dim()}D tensor"
+    assert tensor.dim() in [
+        3,
+        4,
+    ], f"Expected 3D or 4D tensor, got {tensor.dim()}D tensor"
 
     if size is None:
         size = tensor.shape[-2:]
@@ -46,11 +49,11 @@ def get_heatmap(tensor, size=None, cmap='viridis'):
     fig = plt.figure(frameon=False)
     fig.set_size_inches(tensor.shape[1] / 100, tensor.shape[0] / 100)
 
-    ax = plt.Axes(fig, [0., 0., 1., 1.])
+    ax = plt.Axes(fig, [0.0, 0.0, 1.0, 1.0])
     ax.set_axis_off()
     fig.add_axes(ax)
 
-    ax.imshow(tensor, cmap=cmap, aspect='auto')
+    ax.imshow(tensor, cmap=cmap, aspect="auto")
 
     fig.canvas.draw()
 
@@ -114,21 +117,25 @@ def get_density_fig(xy):
         fig: matplotlib.figure.Figure
     """
     # "Viridis-like" colormap with white background
-    white_viridis = LinearSegmentedColormap.from_list('white_viridis', [
-        (0, '#ffffff'),
-        (1e-20, '#440053'),
-        (0.2, '#404388'),
-        (0.4, '#2a788e'),
-        (0.6, '#21a784'),
-        (0.8, '#78d151'),
-        (1, '#fde624'),
-    ], N=256)
+    white_viridis = LinearSegmentedColormap.from_list(
+        "white_viridis",
+        [
+            (0, "#ffffff"),
+            (1e-20, "#440053"),
+            (0.2, "#404388"),
+            (0.4, "#2a788e"),
+            (0.6, "#21a784"),
+            (0.8, "#78d151"),
+            (1, "#fde624"),
+        ],
+        N=256,
+    )
 
     fig = plt.figure()
-    ax = fig.add_subplot(1, 1, 1, projection='scatter_density')
+    ax = fig.add_subplot(1, 1, 1, projection="scatter_density")
     xy = xy.detach().cpu().numpy().round().astype(int)
     density = ax.scatter_density(xy[:, 0], xy[:, 1], cmap=white_viridis)
-    fig.colorbar(density, label='Number of points per pixel')
+    fig.colorbar(density, label="Number of points per pixel")
     return fig
 
 
@@ -141,13 +148,15 @@ def show_image(img: Union[torch.Tensor, np.ndarray, Image.Image]):
     if isinstance(img, torch.Tensor) or isinstance(img, np.ndarray):
         img = ToPILImage()(img)
     elif not isinstance(img, Image.Image):
-        raise ValueError(f"Expected torch.Tensor, np.ndarray or PIL.Image, got {type(img)}")
+        raise ValueError(
+            f"Expected torch.Tensor, np.ndarray or PIL.Image, got {type(img)}"
+        )
 
     # show image without frame
     fig = plt.figure(frameon=False)
     fig.set_size_inches(img.size[0] / 100, img.size[1] / 100)
 
-    ax = plt.Axes(fig, [0., 0., 1., 1.])
+    ax = plt.Axes(fig, [0.0, 0.0, 1.0, 1.0])
     ax.set_axis_off()
     fig.add_axes(ax)
 
@@ -167,7 +176,9 @@ def add_text_label(img: Union[torch.Tensor, np.ndarray, Image.Image], texts: Lis
     elif isinstance(img, np.ndarray):
         img = Image.fromarray(img)
     elif not isinstance(img, Image.Image):
-        raise ValueError(f"Expected torch.Tensor, np.ndarray or PIL.Image, got {type(img)}")
+        raise ValueError(
+            f"Expected torch.Tensor, np.ndarray or PIL.Image, got {type(img)}"
+        )
 
     # add text label
     draw = ImageDraw.Draw(img)
@@ -185,6 +196,7 @@ def add_text_label(img: Union[torch.Tensor, np.ndarray, Image.Image], texts: Lis
         img = np.asarray(img)
 
     return img
+
 
 # if __name__ == "__main__":
 #     grad_tensor = torch.randn(9, 3, 64, 64)

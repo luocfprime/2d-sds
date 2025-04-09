@@ -5,14 +5,14 @@ from collections import defaultdict
 import torch
 import torch.nn.functional as F
 from PIL import Image
-from transformers import CLIPProcessor, CLIPModel
+from transformers import CLIPModel, CLIPProcessor
 
 
 class ClipSimilarity:
     def __init__(
-            self,
-            model_name: str = "openai/clip-vit-large-patch14",
-            device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self,
+        model_name: str = "openai/clip-vit-large-patch14",
+        device=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
     ):
         """
         Initializes the CLIP model and processor from Hugging Face.
@@ -40,7 +40,9 @@ class ClipSimilarity:
         Returns:
             torch.Tensor: Normalized text embeddings.
         """
-        inputs = self.processor(text=texts, return_tensors="pt", padding=True).to(self.device)
+        inputs = self.processor(text=texts, return_tensors="pt", padding=True).to(
+            self.device
+        )
         text_features = self.model.get_text_features(**inputs)
         text_features = F.normalize(text_features, p=2, dim=-1)
         return text_features
@@ -101,7 +103,8 @@ class ClipSimilarity:
         sim_0 = F.cosine_similarity(src_image_features, src_text_features).item()
         sim_1 = F.cosine_similarity(tgt_image_features, tgt_text_features).item()
         sim_direction = F.cosine_similarity(
-            tgt_image_features - src_image_features, tgt_text_features - src_text_features
+            tgt_image_features - src_image_features,
+            tgt_text_features - src_text_features,
         ).item()
         sim_image = F.cosine_similarity(src_image_features, tgt_image_features).item()
 
@@ -127,7 +130,9 @@ def preprocess_image(image_path):
     return image
 
 
-_clip_similarity_instances = defaultdict(lambda: None)  # key: model_name, value: ClipSimilarity instance
+_clip_similarity_instances = defaultdict(
+    lambda: None
+)  # key: model_name, value: ClipSimilarity instance
 
 
 def get_clip_similarity(model_name: str):
@@ -151,12 +156,27 @@ def get_clip_similarity(model_name: str):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--src-img", type=str, required=True, help="Path to the source image.")
-    parser.add_argument("--tgt-img", type=str, required=True, help="Path to the target image.")
-    parser.add_argument("--src-prompt", type=str, required=True, help="Source text prompt.")
-    parser.add_argument("--tgt-prompt", type=str, required=True, help="Target text prompt.")
-    parser.add_argument("--model-name", type=str, default="openai/clip-vit-large-patch14", help="CLIP model to use.")
-    parser.add_argument("--verbose", action="store_true", help="Enable verbose logging.")
+    parser.add_argument(
+        "--src-img", type=str, required=True, help="Path to the source image."
+    )
+    parser.add_argument(
+        "--tgt-img", type=str, required=True, help="Path to the target image."
+    )
+    parser.add_argument(
+        "--src-prompt", type=str, required=True, help="Source text prompt."
+    )
+    parser.add_argument(
+        "--tgt-prompt", type=str, required=True, help="Target text prompt."
+    )
+    parser.add_argument(
+        "--model-name",
+        type=str,
+        default="openai/clip-vit-large-patch14",
+        help="CLIP model to use.",
+    )
+    parser.add_argument(
+        "--verbose", action="store_true", help="Enable verbose logging."
+    )
 
     args = parser.parse_args()
 
@@ -174,7 +194,9 @@ if __name__ == "__main__":
 
     # Calculate similarities
     print(f"Calculating similarities...")
-    results = clip_similarity.compute_similarity(src_img, tgt_img, args.src_prompt, args.tgt_prompt)
+    results = clip_similarity.compute_similarity(
+        src_img, tgt_img, args.src_prompt, args.tgt_prompt
+    )
 
     # Output results
     print(f"Similarity between source image and source text: {results['sim_0']:.4f}")
