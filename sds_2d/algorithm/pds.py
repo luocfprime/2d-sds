@@ -293,7 +293,7 @@ class PDS(BaseAlgorithm):
         loss_avg, grad_avg, grad_max, grad_min = 0, 0, 0, float("inf")
         for _ in range(self.cfg.update_steps_per_iter):
             # use same noise and update params multiple times (experimental)
-            (grad_raw, *_) = self.compute_pds(
+            grad_raw, *_ = self.compute_pds(
                 latents, noise, noise_t_prev, t, t_prev
             ).values()
 

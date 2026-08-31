@@ -10,7 +10,7 @@ This framework contains 3 major components:
 - Rasterizers: located at `PROJECT_ROOT/sds_2d/rasterizers`. Responsible for producing images from arbitrary nn.Parameters (could be latents, pixes, gaussians etc).
 - Weight and timestep schedule: located at `PROJECT_ROOT/sds_2d/wt_schedule`. Responsible for calculating the weight for loss gradient and noise scale for diffusion sampling.
 
-> [!NOTE]  
+> [!NOTE]
 > I recommend to just look at how `sds_2d/algorithm/sds.py` is implemented.
 > This might be the easiest way to understand how this framework works.
 

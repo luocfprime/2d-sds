@@ -218,7 +218,7 @@ class ISM(BaseAlgorithm):
         loss_start, loss_end = None, None  # loss value of start and end of update
         for _ in range(self.cfg.update_steps_per_iter):
             # use same noise and update params multiple times
-            (grad_raw, *_) = self.compute_ism(latents, noise, t).values()
+            grad_raw, *_ = self.compute_ism(latents, noise, t).values()
 
             grad = torch.nan_to_num(  # noqa
                 grad_raw * self.w_schedule(step)  # apply weight schedule
@@ -277,7 +277,7 @@ class ISM(BaseAlgorithm):
         for t in self.cfg.log_sample_timesteps:  # sample with to different timesteps
             noise = torch.randn_like(latents)
 
-            (grad_raw, e_s, e_t) = self.compute_ism(
+            grad_raw, e_s, e_t = self.compute_ism(
                 latents, noise, torch.tensor([t]).to(self.device)
             ).values()
 
