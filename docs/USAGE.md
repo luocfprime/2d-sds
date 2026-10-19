@@ -68,9 +68,9 @@ rasterizer:
 
 This structure makes it easy to experiment with different combinations of settings, algorithms, or representations.
 
-> [!WARNING]  
+> [!WARNING]
 > The framework automatically scans and loads modules from `PROJECT_ROOT/sds_2d/algorithm/`, `PROJECT_ROOT/sds_2d/rasterizer/`, and `PROJECT_ROOT/sds_2d/wt_schedule/`.
 > This offers convenience in extending the framework with new algorithms, representations, or weight and timestep schedules.
-> However, **ensure that server files are synchronized with local files, and no redundant Python files exist in these directories on the server**, 
+> However, **ensure that server files are synchronized with local files, and no redundant Python files exist in these directories on the server**,
 > as redundant files may be unintentionally loaded and cause errors.
 > This is particularly critical when using IDEs like PyCharm.

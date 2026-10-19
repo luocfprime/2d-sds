@@ -202,7 +202,7 @@ class VSD(BaseAlgorithm):
         t = torch.tensor([self.t_schedule(step)]).to(self.device)
 
         # 3. compute vsd
-        (grad_raw, noise_pred, noise_pred_phi, _, _) = self.compute_vsd(
+        grad_raw, noise_pred, noise_pred_phi, _, _ = self.compute_vsd(
             latents, t
         ).values()
 
@@ -300,7 +300,7 @@ class VSD(BaseAlgorithm):
         heatmaps = []
 
         for t in self.cfg.log_sample_timesteps:  # sample with to different timesteps
-            (grad_raw, noise_pred, noise_pred_phi, noise, noisy_latents) = (
+            grad_raw, noise_pred, noise_pred_phi, noise, noisy_latents = (
                 self.compute_vsd(latents, torch.tensor([t]).to(self.device)).values()
             )
 

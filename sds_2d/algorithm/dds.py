@@ -239,7 +239,7 @@ class DDS(BaseAlgorithm):
         loss_avg, grad_avg, grad_max, grad_min = 0, 0, 0, float("inf")
         for _ in range(self.cfg.update_steps_per_iter):
             # use same noise and update params multiple times
-            (grad_raw, *_) = self.compute_dds(latents, noise, t).values()
+            grad_raw, *_ = self.compute_dds(latents, noise, t).values()
 
             grad = torch.nan_to_num(  # noqa
                 grad_raw * self.w_schedule(step)  # apply weight schedule
