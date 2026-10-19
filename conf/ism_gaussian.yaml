@@ -21,4 +21,3 @@ algorithm:
 rasterizer:
   batch_size: 2
   num_points: 50000
-  

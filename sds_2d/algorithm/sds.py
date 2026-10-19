@@ -226,7 +226,7 @@ class SDS(BaseAlgorithm):
         for t in self.cfg.log_sample_timesteps:  # sample with to different timesteps
             noise = torch.randn_like(latents)
 
-            (grad_raw, noise_pred, noise, noisy_latents) = self.compute_sds(
+            grad_raw, noise_pred, noise, noisy_latents = self.compute_sds(
                 latents, noise, torch.tensor([t]).to(self.device)
             ).values()
 
